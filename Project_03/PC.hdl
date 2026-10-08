@@ -14,5 +14,9 @@ CHIP PC {
     OUT out[16];
     
     PARTS:
-    //// Replace this comment with your code.
+    And16(a=in,b=false,out=o1);
+    Register(in=in,load=load,out=o2);
+    Mux16(a=o1,b=o2,sel=load,out=o3);
+    Inc16(in=o3,out=o4);
+    Or16(a=o4,b=false,out=out);
 }
