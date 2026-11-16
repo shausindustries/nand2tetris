@@ -22,7 +22,22 @@ def first_pass(sym_tab,asm):
             addr_counter +=1
     return sym_tab,asm
 
-def encoder(ins):
+def var_alloc(sym_tab,asm,vc):
+    while(vc < 16384):
+        for var in asm:
+            if var[0] == '@':
+                ref = var[1:]
+                if ref in sym_tab or ref.isdigit() :
+                    continue
+                else:
+                    sym_tab[f'{ref}'] = vc
+                    vc += 1
+            else: continue
+        return sym_tab,vc
+                
+
+
+def encoder(ins,sym_tab):
     des = {'M':'001','D':'010','MD':'011','A':'100','AM':'101','AD':'110','AMD':'111'}
     jum = {'JGT':'001','JEQ':'010','JGE':'011','JLT':'100','JNE':'101','JLE':'110','JMP':'111'}
     com ={'0':'0101010','1':'0111111','-1':'0111010','D':'0001100','A':'0110000','!D':'0001101',
@@ -31,12 +46,17 @@ def encoder(ins):
           'M':'1110000','!M':'1110001','-M':'1110011','M+1':'1110111','M-1':'1110010','D+M':'1000010','D-M':'1010011',
           'M-D':'1000111','D&M':'1000000','D|M':'1010101'}
     
-    #for ins in instr:
-    
     if (ins[0] == '@'):
-        value = int(ins[1:])
-        val = str(bin(value)[2:].zfill(15))
-        return '0' + val
+        if ins[1:].isdigit():
+            value = int(ins[1:])
+            val = str(bin(value)[2:].zfill(15))
+            return '0' + val
+        else:
+            for sym in sym_tab:
+                if ins[1:] == sym:
+                    value = int(sym_tab[f"{ins[1:]}"])
+                    val = str(bin(value)[2:].zfill(15))
+                    return '0' + val
     else :
         if "=" in ins:
             dest,comp = ins.split("=",1)
@@ -57,15 +77,22 @@ def encoder(ins):
             else:
                 print("Invalid Comp !")
 
-            
+
+
+
+
+
 
 
 
 symbols = {'SP':'0','LCL':'1','ARG':'2','THIS':'3','THAT':'4','SCREEN':'16384','KBD':'24576','R0':'0','R1':'1','R2':'2','R3':'3','R4':'4','R5':'5','R6':'6','R7':'7','R8':'8','R9':'9'
            ,'R10':'10','R11':'11','R12':'12','R13':'13','R14':'14','R15':'15'}
-pp_asm = []
+pp_asm = ["@i", "@sum", "@i", "@temp", "@sum", "@10"]
 
-preprocessor(pp_asm)
-first_pass(symbols,pp_asm)
-for c in pp_asm:
-    print(encoder(c))
+print(var_alloc(symbols,pp_asm,16))
+
+# preprocessor(pp_asm)
+# first_pass(symbols,pp_asm)
+# var_alloc
+# for c in pp_asm:
+#     print(encoder(c))

@@ -5,7 +5,10 @@ addr_counter = 0
 for symb in asm: 
     if symb[0] == '(':   
         label = (symb.split("(",1)[1].split(")",1)[0])
-        sym_tab[label] = str(addr_counter) 
+        if label in sym_tab:
+            continue
+        else:
+            sym_tab[label] = str(addr_counter) 
     else:
         addr_counter +=1
 
