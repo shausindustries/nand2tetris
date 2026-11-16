@@ -1,15 +1,14 @@
 def preprocessor(asm):
-    with open("code.asm","r") as f:
+    with open("Pong.asm","r") as f:
         for line in f:
             if '//' in line[0:2]:
                 continue
             else:
                 if '//' in line:
-                    ic = line.split("//",1)[0]
-                    line = ic.strip()
+                    line = line.split("//",1)[0].strip()
                     asm.append(line)
                 elif line.strip():
-                    asm.append(line.strip('\n'))
+                    asm.append(line.strip('\n').strip())
     return asm
 
 def first_pass(sym_tab,asm):
@@ -71,25 +70,41 @@ def encoder(ins,sym_tab):
                 return '0' + val
     else :
         if "=" in ins:
-            dest,comp = ins.split("=",1)
-            if dest in des:
+            if ";" in ins:
+                jump = ins.split(";",1)[1]
+                dest,comp = ins.split("=",1)
+                if dest in des:
+                    if comp in com:
+                        if jump in jum:
+                            return '111' + com[comp] + des[dest] + jum[jump]
+                        else:
+                            return "Invalid Jump !"
+                    else:
+                        return "Invalid Comp !"
+                else:
+                    return "Invalid Dest !"
+            else:
+                dest,comp = ins.split("=",1)
+                if dest in des:
+                    if comp in com:
+                        return '111' + com[comp] + des[dest] + '000'
+                    else:
+                        return "Invalid Comp !"
+                else:
+                    return "Invalid Dest !"
+        else:
+            if ";" in ins:
+                comp,jump = ins.split(';',1)
                 if comp in com:
-                    return '111' + com[comp] + des[dest] + '000'
+                    if jump in jum:
+                        return '111' + com[comp] + '000' + jum[jump] 
+                    else:
+                        return "Invalid Jump !"
                 else:
                     return "Invalid Comp !"
-            else:
-                return "Invalid Dest !"
-        else:
-            comp,jump = ins.split(';',1)
-            if comp in com:
-                if jump in jum:
-                    return '111' + com[comp] + '000' + jum[jump] 
-                else:
-                    return "Invalid Jump !"
-            else:
-                print("Invalid Comp !")
-
-
+            else: 
+                comp = ins
+                return '111' + com[comp] + '000' + '000'
 
 symbols = {'SP':'0','LCL':'1','ARG':'2','THIS':'3','THAT':'4','SCREEN':'16384','KBD':'24576','R0':'0','R1':'1','R2':'2','R3':'3','R4':'4','R5':'5','R6':'6','R7':'7','R8':'8','R9':'9'
            ,'R10':'10','R11':'11','R12':'12','R13':'13','R14':'14','R15':'15'}
@@ -101,6 +116,6 @@ preprocessor(pp_asm)
 first_pass(symbols,pp_asm)
 second_pass(symbols,pp_asm,var_counter,machine)
 
-with open ("output.hack", "w") as f:
+with open ("Pong.hack", "w") as f:
     for mc in machine:
         f.write(f"{mc}\n")
