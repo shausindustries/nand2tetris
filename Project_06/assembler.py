@@ -35,19 +35,19 @@ def var_alloc(sym_tab,asm,vc):
             else: continue
         return sym_tab,vc
                 
-def second_pass(st,ase,var_c):
+def second_pass(st,ase,var_c,mc):
     for c in ase:
         if c[0] == '(':
             continue
         elif c[0] == '@':
             ref = c[1:]
             if ref in st or ref.isdigit():
-                print(encoder(c,st))
+                mc.append(encoder(c,st))
             else:
                 var_alloc(st,ase,var_c)
-                print(encoder(c,st))
+                mc.append(encoder(c,st))
         else:
-            print(encoder(c,st))
+            mc.append(encoder(c,st))
                 
 
 def encoder(ins,sym_tab):
@@ -94,9 +94,13 @@ def encoder(ins,sym_tab):
 symbols = {'SP':'0','LCL':'1','ARG':'2','THIS':'3','THAT':'4','SCREEN':'16384','KBD':'24576','R0':'0','R1':'1','R2':'2','R3':'3','R4':'4','R5':'5','R6':'6','R7':'7','R8':'8','R9':'9'
            ,'R10':'10','R11':'11','R12':'12','R13':'13','R14':'14','R15':'15'}
 pp_asm = []
+machine = []
 
 var_counter = 16
 preprocessor(pp_asm)
 first_pass(symbols,pp_asm)
-second_pass(symbols,pp_asm,var_counter)
+second_pass(symbols,pp_asm,var_counter,machine)
 
+with open ("output.hack", "w") as f:
+    for mc in machine:
+        f.write(f"{mc}\n")
