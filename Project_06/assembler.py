@@ -20,7 +20,7 @@ def first_pass(sym_tab,asm):
             sym_tab[label] = str(addr_counter) 
         else:
             addr_counter +=1
-    return sym_tab,asm
+    return sym_tab
 
 def var_alloc(sym_tab,asm,vc):
     while(vc < 16384):
@@ -35,7 +35,20 @@ def var_alloc(sym_tab,asm,vc):
             else: continue
         return sym_tab,vc
                 
-
+def second_pass(st,ase,var_c):
+    for c in ase:
+        if c[0] == '(':
+            continue
+        elif c[0] == '@':
+            ref = c[1:]
+            if ref in st or ref.isdigit():
+                print(encoder(c,st))
+            else:
+                var_alloc(st,ase,var_c)
+                print(encoder(c,st))
+        else:
+            print(encoder(c,st))
+                
 
 def encoder(ins,sym_tab):
     des = {'M':'001','D':'010','MD':'011','A':'100','AM':'101','AD':'110','AMD':'111'}
@@ -52,11 +65,10 @@ def encoder(ins,sym_tab):
             val = str(bin(value)[2:].zfill(15))
             return '0' + val
         else:
-            for sym in sym_tab:
-                if ins[1:] == sym:
-                    value = int(sym_tab[f"{ins[1:]}"])
-                    val = str(bin(value)[2:].zfill(15))
-                    return '0' + val
+            if ins[1:] in sym_tab:
+                value = int(sym_tab[f"{ins[1:]}"])
+                val = str(bin(value)[2:].zfill(15))
+                return '0' + val
     else :
         if "=" in ins:
             dest,comp = ins.split("=",1)
@@ -79,20 +91,12 @@ def encoder(ins,sym_tab):
 
 
 
-
-
-
-
-
-
 symbols = {'SP':'0','LCL':'1','ARG':'2','THIS':'3','THAT':'4','SCREEN':'16384','KBD':'24576','R0':'0','R1':'1','R2':'2','R3':'3','R4':'4','R5':'5','R6':'6','R7':'7','R8':'8','R9':'9'
            ,'R10':'10','R11':'11','R12':'12','R13':'13','R14':'14','R15':'15'}
-pp_asm = ["@i", "@sum", "@i", "@temp", "@sum", "@10"]
+pp_asm = []
 
-print(var_alloc(symbols,pp_asm,16))
+var_counter = 16
+preprocessor(pp_asm)
+first_pass(symbols,pp_asm)
+second_pass(symbols,pp_asm,var_counter)
 
-# preprocessor(pp_asm)
-# first_pass(symbols,pp_asm)
-# var_alloc
-# for c in pp_asm:
-#     print(encoder(c))
